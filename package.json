@@ -1,0 +1,44 @@
+{
+  "name": "authentication-api",
+  "version": "1.0.0",
+  "description": "JWT authentication and email OTP password reset API built with Node.js, Express, and MongoDB.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
+    "start": "cross-env NODE_ENV=production node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "Mohammed Noorudheen MT <noorudheen@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noorudheenmt/authentication-api.git"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "authentication",
+    "jwt",
+    "otp",
+    "email",
+    "api",
+    "mongodb"
+  ],
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.3.1",
+    "nodemailer": "^6.9.4",
+    "winston": "^3.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
