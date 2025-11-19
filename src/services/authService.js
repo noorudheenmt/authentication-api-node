@@ -1,39 +1,75 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const bcrypt = require('bcrypt');
-const config = require('../config');
+import bcrypt from "bcryptjs";
+import User from "../models/userModel.js";
+import Otp from "../models/otpModel.js";
+import generateToken from "../utils/generateToken.js";
+import generateOtp from "../utils/generateOtp.js";
+import sendEmail from "../utils/sendEmail.js";
 
-const authService = {
-    register: async (userData) => {
-        const hashedPassword = await bcrypt.hash(userData.password, 10);
-        const newUser = new User({
-            username: userData.username,
-            password: hashedPassword,
-            email: userData.email
-        });
-        return await newUser.save();
-    },
+// register user
+export const registerUser = async ({ name, email, password }) => {
+  const existingUser = await User.findOne({ email });
+  if (existingUser) throw new Error("Email already registered");
 
-    login: async (username, password) => {
-        const user = await User.findOne({ username });
-        if (!user) {
-            throw new Error('User not found');
-        }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            throw new Error('Invalid credentials');
-        }
-        const token = jwt.sign({ id: user._id }, config.JWT_SECRET, { expiresIn: '1h' });
-        return { token, user };
-    },
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    validateToken: (token) => {
-        try {
-            return jwt.verify(token, config.JWT_SECRET);
-        } catch (error) {
-            throw new Error('Invalid token');
-        }
-    }
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
+
+  const token = generateToken(user._id);
+  return { user, token };
 };
 
-module.exports = authService;
+// login user
+export const loginUser = async ({ email, password }) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new Error("Invalid email or password");
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new Error("Invalid email or password");
+
+  const token = generateToken(user._id);
+  return { user, token };
+};
+
+// send otp
+export const sendOtpToEmail = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new Error("Email not found");
+
+  const otp = generateOtp();
+
+  await Otp.create({
+    email,
+    otp,
+    expireAt: Date.now() + 5 * 60 * 1000,
+  });
+
+  await sendEmail({
+    to: email,
+    subject: "Your OTP Code",
+    text: `Your OTP is ${otp}. It expires in 5 minutes.`,
+  });
+
+  return { email, otpSent: true };
+};
+
+// verify otp and reset password
+export const verifyOtpAndReset = async (email, otp, newPassword) => {
+  const existingOtp = await Otp.findOne({ email, otp });
+  if (!existingOtp) throw new Error("Invalid OTP");
+
+  if (existingOtp.expireAt < Date.now()) {
+    throw new Error("OTP expired");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await User.findOneAndUpdate({ email }, { password: hashedPassword });
+
+  await Otp.deleteMany({ email });
+
+  return { email, passwordReset: true };
+};
