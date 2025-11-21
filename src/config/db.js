@@ -3,11 +3,11 @@ import config from "./config.js";
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(config.dbUri, {
+    await mongoose.connect(config.databaseUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log(`MongoDB connected: ${config.env}`);
+    console.log(`MongoDB connected: ${config.environment}`);
   } catch (error) {
     console.error("MongoDB connection failed:", error.message);
     process.exit(1);

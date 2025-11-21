@@ -12,6 +12,7 @@ app.use(express.json());
 
 // public routes
 app.use('/api/auth', authRoutes);
+
 // protected routes 
 app.use('/api/user', userRoutes); 
 

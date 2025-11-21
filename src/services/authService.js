@@ -6,7 +6,7 @@ import generateOtp from "../utils/generateOtp.js";
 import sendEmail from "../utils/sendEmail.js";
 
 // register user
-export const registerUser = async ({ name, email, password }) => {
+export const registerUser = async ({ name, email, password, role }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new Error("Email already registered");
 
@@ -16,10 +16,10 @@ export const registerUser = async ({ name, email, password }) => {
     name,
     email,
     password: hashedPassword,
+    role: role || "user",
   });
 
-  const token = generateToken(user._id);
-  return { user, token };
+  return user;
 };
 
 // login user
