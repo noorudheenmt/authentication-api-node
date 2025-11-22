@@ -4,6 +4,7 @@ import Otp from "../models/otpModel.js";
 import generateToken from "../utils/generateToken.js";
 import generateOtp from "../utils/generateOtp.js";
 import sendEmail from "../utils/sendEmail.js";
+import loadTemplate from "../utils/loadTemplate.js";
 
 // register user
 export const registerUser = async ({ name, email, password, role }) => {
@@ -47,10 +48,14 @@ export const sendOtpToEmail = async (email) => {
     expireAt: Date.now() + 5 * 60 * 1000,
   });
 
+  // load email template
+  let html = loadTemplate("otpEmail.html");
+  html = html.replace(/{{OTP}}/g, otp);
+
   await sendEmail({
     to: email,
     subject: "Your OTP Code",
-    text: `Your OTP is ${otp}. It expires in 5 minutes.`,
+    html,
   });
 
   return { email, otpSent: true };
