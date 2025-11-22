@@ -10,9 +10,6 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
-// images static folder
-app.use('/images', express.static('public/images'));
-
 // public routes
 app.use('/api/auth', authRoutes);
 
